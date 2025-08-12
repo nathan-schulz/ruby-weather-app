@@ -1,2 +1,25 @@
-<h1>Forecasts#index</h1>
-<p>Find me in app/views/forecasts/index.html.erb</p>
+<h1>Weather Forecast</h1>
+
+<%# Form for entering a zipcode to get a forecast %>
+<%= form_with url: forecasts_path, method: :get, local: true do |form| %>
+  <div>
+    <%= form.label :zipcode, "Enter Zipcode or Address:" %>
+    <%= form.text_field :zipcode, value: @zipcode, placeholder: "65613" %>
+    <%= form.submit "Get Forecast" %>
+  </div>
+<% end %>
+
+<hr>
+
+<%# Display the forecast or an error message%>
+<% if @forecast %>
+  <h2>Forecast for <%= @zipcode %></h2>
+  <ul>
+    <li>Current Temperature: <%= @forecast.temperature %>°F</li>
+    <li>High: <%= @forecast.high %>°F</li>
+    <li>Low: <%= @forecast.low %>°F</li>
+    <li><em>Pulled from cached data? <%= @forecast.cached %></em></li>
+  </ul>
+<% elsif flash.now[:alert] %>
+  <p style="color:red;"><%= flash.now[:alert] %></p>
+<% end %>

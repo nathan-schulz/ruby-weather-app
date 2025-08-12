@@ -1,6 +1,11 @@
 Rails.application.routes.draw do
-  get "forecasts/index"
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  # Provides a single endpoint for retrieving weather forecasts.
+  # This maps GET /forecasts to the ForecastsController#index action.
+  #
+  # Example:
+  #   GET /forecasts?zipcode=65613
+  #     → Displays the current weather and high/low temperatures
+  resources :forecasts, only: [:index]
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.
@@ -11,5 +16,7 @@ Rails.application.routes.draw do
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
 
   # Defines the root path route ("/")
-  # root "posts#index"
+  # When visiting http://localhost:3000/, have the request go to
+  # ForecastsController's index action to render the weather forecast page
+  root "forecasts#index"
 end
