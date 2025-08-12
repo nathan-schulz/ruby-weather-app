@@ -41,16 +41,25 @@ class ForecastService
 
     # Create a WeatherData struct with the retrieved weather data
     data = WeatherData.new(
-      weather[:temp],    # current temperature
-      weather[:high],    # today's high temperature
-      weather[:low],     # today's low temperature
-      false              # cached is false, since we fetched fresh data
+      c_to_f(weather[:temp]),    # current temperature
+      c_to_f(weather[:high]),    # today's high temperature
+      c_to_f(weather[:low]),    # today's low temperature
+      false                      # cached is false, since we fetched fresh data
     )
 
     # Cache the new weather data with the set CACHE_RESET_TIME
     Rails.cache.write(cache_key(zipcode), data, expires_in: CACHE_RESET_TIME)
 
     data
+  end
+
+  # Converts the temperature from Celsius to Fahrenheit
+  #
+  # @param celsius [Float, nil] Temperature in Celsius
+  # @return [Float, nil] Temperature converted to Fahrenheit, or nil if input is nil
+  def c_to_f(celsius)
+    return nil if celsius.nil?
+    (celsius * 9.0 / 5.0) + 32
   end
 
   private

@@ -37,23 +37,23 @@ RSpec.describe ForecastService do
       Rails.cache.clear
 
       fake_response = instance_double(Faraday::Response, success?: true, body: {
-        "current_weather" => { "temperature" => 70.0 },
+        "current_weather" => { "temperature" => 21.1 },  # Celsius 21.1 ~ 70F
         "daily" => {
-          "temperature_2m_max" => [80.0],
-          "temperature_2m_min" => [60.0]
+          "temperature_2m_max" => [26.7],  # Celsius 26.7 ~ 80F
+          "temperature_2m_min" => [15.6]   # Celsius 15.6 ~ 60F
         }
       }.to_json)
 
       allow(Faraday).to receive(:get).and_return(fake_response)
     end
 
-    it "fetches weather and caches the result" do
+    it "fetches weather, converts temps to Fahrenheit, and caches the result" do
       result = service.fetch_forecast
 
       expect(result).to be_a(ForecastService::WeatherData)
-      expect(result.temperature).to eq(70.0)
-      expect(result.high).to eq(80.0)
-      expect(result.low).to eq(60.0)
+      expect(result.temperature).to be_within(0.1).of(70.0)
+      expect(result.high).to be_within(0.1).of(80.0)
+      expect(result.low).to be_within(0.1).of(60.0)
       expect(result.cached).to be false
 
       cached = Rails.cache.read("forecast:65613")
