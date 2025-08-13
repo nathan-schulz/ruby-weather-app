@@ -1,15 +1,14 @@
 require 'rails_helper'
 
-# Specs in this file have access to a helper object that includes
-# the ForecastsHelper. For example:
-#
-# describe ForecastsHelper do
-#   describe "string concat" do
-#     it "concats two strings with spaces" do
-#       expect(helper.concat_strings("this","that")).to eq("this that")
-#     end
-#   end
-# end
 RSpec.describe ForecastsHelper, type: :helper do
-  pending "add some examples to (or delete) #{__FILE__}"
+  describe "#weather_code_to_description" do
+    it "returns correct description for known code" do
+      expect(helper.weather_code_to_description(0)).to eq("Clear Sky")
+      expect(helper.weather_code_to_description(61)).to eq("Rain")
+    end
+
+    it "returns 'Unknown' for unrecognized codes" do
+      expect(helper.weather_code_to_description(999)).to eq("Unknown")
+    end
+  end
 end

@@ -36,24 +36,23 @@ RSpec.describe ForecastService do
     before do
       Rails.cache.clear
 
-      fake_response = instance_double(Faraday::Response, success?: true, body: {
-        "current_weather" => { "temperature" => 21.1 },  # Celsius 21.1 ~ 70F
-        "daily" => {
-          "temperature_2m_max" => [26.7],  # Celsius 26.7 ~ 80F
-          "temperature_2m_min" => [15.6]   # Celsius 15.6 ~ 60F
+      allow(service).to receive(:fetch_weather).and_return(
+        {
+          temp: 21.1,
+          high: 26.7,
+          low: 15.6,
+          extended_forecast: [{ date: Date.today, high: service.c_to_f(26.7), low: service.c_to_f(15.6), weathercode: 0 }]
         }
-      }.to_json)
-
-      allow(Faraday).to receive(:get).and_return(fake_response)
+      )
     end
 
-    it "fetches weather, converts temps to Fahrenheit, and caches the result" do
+    it "fetches weather, converts temps to rounded Fahrenheit, and caches the result" do
       result = service.fetch_forecast
 
       expect(result).to be_a(ForecastService::WeatherData)
-      expect(result.temperature).to be_within(0.1).of(70.0)
-      expect(result.high).to be_within(0.1).of(80.0)
-      expect(result.low).to be_within(0.1).of(60.0)
+      expect(result.temperature).to eq(70)
+      expect(result.high).to eq(80)
+      expect(result.low).to eq(60)
       expect(result.cached).to be false
 
       cached = Rails.cache.read("forecast:65613")
@@ -82,6 +81,36 @@ RSpec.describe ForecastService do
 
     it "returns nil" do
       expect(service.fetch_forecast).to be_nil
+    end
+  end
+
+  context 'extended forecast' do
+    it 'includes extended forecast with correct Fahrenheit values and weather codes' do
+      service = ForecastService.new('65613')
+
+      allow(service).to receive(:geocode_zipcode).and_return('65613')
+      allow(service).to receive(:lat_lon).and_return([37.614, -93.410])
+      allow(service).to receive(:fetch_weather).and_return(
+        {
+          temp: 20.0,
+          high: 25.0,
+          low: 15.0,
+          extended_forecast: [
+            { date: Date.today, high: service.c_to_f(25), low: service.c_to_f(15), weathercode: 0 }
+          ]
+        }
+      )
+
+      result = service.fetch_forecast
+
+      expect(result.extended_forecast).to eq([
+        {
+          date: Date.today,
+          high: 77,
+          low: 59,
+          weathercode: 0
+        }
+      ])
     end
   end
 end

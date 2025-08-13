@@ -9,8 +9,8 @@ require 'json'
 class ForecastService
   CACHE_RESET_TIME= 30.minutes
 
-  # Struct to hold weather data and boolean val for if it was returned from the cache
-  WeatherData = Struct.new(:temperature, :high, :low, :cached)
+  # Struct to hold weather data, boolean val for if it was returned from the cache, and data for the extended forecast
+  WeatherData = Struct.new(:temperature, :high, :low, :cached, :extended_forecast)
 
   # Initialize the service with the specified address or zipcode string
   #
@@ -41,10 +41,11 @@ class ForecastService
 
     # Create a WeatherData struct with the retrieved weather data
     data = WeatherData.new(
-      c_to_f(weather[:temp]),    # current temperature
-      c_to_f(weather[:high]),    # today's high temperature
-      c_to_f(weather[:low]),    # today's low temperature
-      false                      # cached is false, since we fetched fresh data
+      c_to_f(weather[:temp]),     # current temperature
+      c_to_f(weather[:high]),     # today's high temperature
+      c_to_f(weather[:low]),      # today's low temperature
+      false,                      # cached is false, since we fetched fresh data
+      weather[:extended_forecast] # data for the extended forecast
     )
 
     # Cache the new weather data with the set CACHE_RESET_TIME
@@ -53,13 +54,13 @@ class ForecastService
     data
   end
 
-  # Converts the temperature from Celsius to Fahrenheit
+  # Converts the temperature from Celsius to Fahrenheit, rounded to nearest integer
   #
   # @param celsius [Float, nil] Temperature in Celsius
-  # @return [Float, nil] Temperature converted to Fahrenheit, or nil if input is nil
+  # @return [Integer, nil] Temperature converted to Fahrenheit and rounded, or nil if input is nil
   def c_to_f(celsius)
     return nil if celsius.nil?
-    (celsius * 9.0 / 5.0) + 32
+    ((celsius * 9.0 / 5.0) + 32).round
   end
 
   private
@@ -109,7 +110,7 @@ class ForecastService
       latitude: lat,
       longitude: lon,
       current_weather: true,
-      daily: 'temperature_2m_max,temperature_2m_min',
+      daily: 'temperature_2m_max,temperature_2m_min,weathercode',
       timezone: 'auto'
     }
 
@@ -122,11 +123,26 @@ class ForecastService
     # Parse the JSON response body
     json = JSON.parse(response.body)
 
-    # Extract the current temperature, daily max (high), and daily min (low) temperatures
+    # Build an extended forecast array of hashes (date, high, low, weathercode)
+    extended_forecast = json['daily']['time'].zip(
+      json['daily']['temperature_2m_max'],
+      json['daily']['temperature_2m_min'],
+      json['daily']['weathercode']
+    ).map do |date, max, min, code|
+      {
+        date: date,
+        high: c_to_f(max),
+        low: c_to_f(min),
+        weathercode: code
+      }
+    end
+
+    # Extract and return the current temperature, daily max (high), daily min (low) temperatures, and extended forecast
     {
       temp: json.dig("current_weather", "temperature"),
       high: json.dig("daily", "temperature_2m_max")&.first,
-      low: json.dig("daily", "temperature_2m_min")&.first
+      low: json.dig("daily", "temperature_2m_min")&.first,
+      extended_forecast: extended_forecast
     }
   rescue StandardError => e
     # Log errors for debugging and then fail gracefully by returning nil

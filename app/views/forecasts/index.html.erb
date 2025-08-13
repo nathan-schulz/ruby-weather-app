@@ -11,7 +11,7 @@
 
 <hr>
 
-<%# Display the forecast or an error message%>
+<%# Display the forecast or an error message %>
 <% if @forecast %>
   <h2>Forecast for <%= @zipcode %></h2>
   <ul>
@@ -22,4 +22,33 @@
   </ul>
 <% elsif flash.now[:alert] %>
   <p style="color:red;"><%= flash.now[:alert] %></p>
+<% end %>
+
+<%# Display the extended forecast or an error message %>
+<% if @forecast %>
+  <h2>7-Day Forecast</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>High (°F)</th>
+        <th>Low (°F)</th>
+        <th>Condition</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @forecast.extended_forecast.each do |day| %>
+        <tr>
+          <td><%= day[:date] %></td>
+          <td><%= day[:high] %></td>
+          <td><%= day[:low] %></td>
+          <td><%= weather_code_to_description(day[:weathercode]) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <% if flash.now[:alert] %>
+    <p style="color:red;"><%= flash.now[:alert] %></p>
+  <% end %>
 <% end %>

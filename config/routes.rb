@@ -4,7 +4,7 @@ Rails.application.routes.draw do
   #
   # Example:
   #   GET /forecasts?zipcode=65613
-  #     → Displays the current weather and high/low temperatures
+  #     Displays the current weather and high/low temperatures
   resources :forecasts, only: [:index]
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

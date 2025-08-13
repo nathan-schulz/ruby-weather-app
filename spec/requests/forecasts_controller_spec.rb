@@ -4,7 +4,8 @@ RSpec.describe "Forecasts", type: :request do
   describe "GET /forecasts" do
     let(:zipcode) { "65613" }
     let(:forecast_data) do
-      ForecastService::WeatherData.new(68.0, 72.0, 60.0, false)
+      extended = [{ date: Date.today, high: 80, low: 65, description: "Clear Sky" }]
+      ForecastService::WeatherData.new(68, 80, 65, false, extended)
     end
 
     context "when forecast is successfully retrieved" do
