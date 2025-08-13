@@ -12,13 +12,15 @@ class ForecastsController < ApplicationController
   #
   # @return [void]
   def index
-    @zipcode = params[:zipcode] || "65613"
+    @zipcode = params[:zipcode]
 
-    service = ForecastService.new(@zipcode)
-    @forecast = service.fetch_forecast
+    if @zipcode.present?
+      service = ForecastService.new(@zipcode)
+      @forecast = service.fetch_forecast
 
-    if @forecast.nil?
-      flash.now[:alert] = "Could not retrieve forecast for #{@zipcode}."
+      flash.now[:alert] = "Could not retrieve forecast for #{@zipcode}." if @forecast.nil?
+    else
+      @forecast = nil
     end
   end
 end

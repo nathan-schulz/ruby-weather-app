@@ -3,15 +3,15 @@
 <%# Form for entering a zipcode to get a forecast %>
 <%= form_with url: forecasts_path, method: :get, local: true do |form| %>
   <div>
-    <%= form.label :zipcode, "Enter Zipcode or Address:" %>
-    <%= form.text_field :zipcode, value: @zipcode, placeholder: "65613" %>
+    <%= form.label :zipcode, "Enter an Address or Zipcode:" %>
+    <%= form.text_field :zipcode, value: @zipcode, placeholder: "e.g. 102 E Broadway St, Bolivar, MO 65613", class: "wide-text-field" %>
     <%= form.submit "Get Forecast" %>
   </div>
 <% end %>
 
 <hr>
 
-<%# Display the forecast or an error message %>
+<%# Display the forecast if present %>
 <% if @forecast %>
   <h2>Forecast for <%= @zipcode %></h2>
   <ul>
@@ -20,14 +20,10 @@
     <li>Low: <%= @forecast.low %>°F</li>
     <li><em>Pulled from cached data? <%= @forecast.cached %></em></li>
   </ul>
-<% elsif flash.now[:alert] %>
-  <p style="color:red;"><%= flash.now[:alert] %></p>
-<% end %>
 
-<%# Display the extended forecast or an error message %>
-<% if @forecast %>
+<%# Display the extended forecast %>
   <h2>7-Day Forecast</h2>
-  <table>
+  <table class="centered-table">
     <thead>
       <tr>
         <th>Date</th>
@@ -47,8 +43,9 @@
       <% end %>
     </tbody>
   </table>
-<% else %>
-  <% if flash.now[:alert] %>
-    <p style="color:red;"><%= flash.now[:alert] %></p>
-  <% end %>
+<% end %>
+
+<%# Display error message if present %>
+<% if flash.now[:alert].present? %>
+  <p style="color:red;"><%= flash.now[:alert] %></p>
 <% end %>

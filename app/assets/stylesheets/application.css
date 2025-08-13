@@ -13,3 +13,14 @@
  *= require_tree .
  *= require_self
  */
+
+.wide-text-field {
+  width: 400px;
+  max-width: 100%;
+}
+
+.centered-table th,
+.centered-table td {
+  text-align: center;
+  padding: 8px;
+}
