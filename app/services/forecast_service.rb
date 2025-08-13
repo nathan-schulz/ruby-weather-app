@@ -3,18 +3,18 @@ require 'json'
 
 # ForecastService
 # Responsible for:
-# - Geocoding a specified address or zipcode to get latitude, longitude, and zipcode
+# - Geocoding a specified address to get latitude, longitude, and zipcode
 # - Fetching current weather, high, and low temperatures from a weather API
 # - Caching the results for 30 minutes
 class ForecastService
-  CACHE_RESET_TIME= 30.minutes
+  CACHE_RESET_TIME = 30.minutes
 
   # Struct to hold weather data, boolean val for if it was returned from the cache, and data for the extended forecast
   WeatherData = Struct.new(:temperature, :high, :low, :cached, :extended_forecast)
 
-  # Initialize the service with the specified address or zipcode string
+  # Initialize the service with the specified address string
   #
-  # @param address [String] The specified address or zipcode
+  # @param address [String] The specified address
   def initialize(address)
     @address = address
   end

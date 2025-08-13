@@ -55,7 +55,7 @@ RSpec.describe "forecasts/index.html.erb", type: :view do
 
     it "shows the address input field with the placeholder" do
       expect(rendered).to include('placeholder="e.g. 102 E Broadway St, Bolivar, MO 65613"')
-      expect(rendered).to include("Enter an Address or Zipcode:")
+      expect(rendered).to include("Enter an Address or Zip/Postal Code:")
     end
   end
 end
